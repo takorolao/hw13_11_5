@@ -1,0 +1,135 @@
+{% load custom_filters %}
+{% load custom_tags %}
+{% load thumbnail %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Burger Menu</title>
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Burger Menu</a>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>Burgers:</h2>
+        <ul class="list-group">
+            {% for burger in burgers %}
+                <li class="list-group-item">{{ burger.name }}</li>
+            {% empty %}
+                <li class="list-group-item">No burgers available.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+
+    <div class="container mt-4">
+        <h2>Burgers:</h2>
+        <div id="accordion">
+            {% for burger in burgers %}
+                <div class="card">
+                    <div class="card-header" id="heading{{ burger.id }}">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{ burger.id }}" aria-expanded="true" aria-controls="collapse{{ burger.id }}">
+                                {{ burger.name }}
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapse{{ burger.id }}" class="collapse" aria-labelledby="heading{{ burger.id }}" data-parent="#accordion">
+                        <div class="card-body">
+                            <strong>Ingredients:</strong>
+                            <ul>
+                                {% for ingredient in burger.ingredients.all %}
+                                    <li>{{ ingredient.name }}</li>
+                                {% empty %}
+                                    <li>No ingredients.</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="alert alert-warning" role="alert">
+                    No burgers available.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if burger.image %}
+    <img src="{{ burger.image.url }}" alt="{{ burger.name }}">
+    {% thumbnail burger.image "100x100" crop="smart" as thumbnail %}
+    <img src="{{ thumbnail.url }}" alt="{{ burger.name }} thumbnail">
+{% else %}
+    <p>No image available</p>
+{% endif %}
+
+
+
+
+    <a href="{% url 'create_burger' %}">Create Burger</a>
+
+    
+
+    <!-- Добавляем кнопку для открытия модального окна -->
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#burgerModal">
+    More Info
+  </button>
+  
+  <!-- Модальное окно -->
+  <div class="modal fade" id="burgerModal" tabindex="-1" role="dialog" aria-labelledby="burgerModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="burgerModalLabel">Burger Information</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+         <p>burger</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  {% with burgers|filter_by_price_range:'10:20' as filtered_burgers %}
+    <ul>
+        {% for burger in filtered_burgers %}
+            <li>{{ burger.name }} - Price: ${{ burger.price }}</li>
+        {% endfor %}
+    </ul>
+{% endwith %}
+
+
+
+
+{% with burgers|filter_by_special_ingredient:'Avocado' as special_burgers %}
+    <ul>
+        {% for burger in special_burgers %}
+            <li>{{ burger.name }} - Special Ingredient: {{ ingredient_name }}</li>
+        {% endfor %}
+    </ul>
+{% endwith %}
+
+<h2>Random Burger:</h2>
+{% random_burger as random_burger %}
+{{ random_burger.name }}
+
+<p>Total Ingredients: {% ingredient_count %}</p>
+  
+
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
